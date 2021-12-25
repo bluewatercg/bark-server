@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gofiber/fiber/v2/utils"
 	"net/url"
 	"strings"
 
@@ -33,6 +34,14 @@ func init() {
 
 func routeDoPush(c *fiber.Ctx) error {
 	params := make(map[string]interface{})
+
+	// Get content-type
+	contentType := utils.ToLower(utils.UnsafeString(c.Request().Header.ContentType()))
+	contentType = utils.ParseVendorSpecificContentType(contentType)
+	// json request use API V2
+	if strings.HasPrefix(contentType, "application/json") {
+		return routeDoPushV2(c)
+	}
 
 	visitor := func(key, value []byte) {
 		params[strings.ToLower(string(key))] = string(value)
